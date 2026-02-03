@@ -34,7 +34,15 @@ func main() {
 	{
 		posts.GET("", handlers.GetPosts)    // Получить все посты
 		posts.POST("", handlers.CreatePost) // Создать посты
+
+		comments := posts.Group("/:id/comments")
+		{
+			comments.GET("", handlers.GetCommentsByPost)
+			comments.POST("", handlers.CreateComment)
+		}
 	}
+
+	r.GET("/comments", handlers.GetAllComments)
 
 	log.Println("Сревер запущен на порту 8080")
 	r.Run(":8080")

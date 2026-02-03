@@ -56,6 +56,28 @@ func (r *UserRepository) GetByNickname(nickname string) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *UserRepository) GetByID(userID int) (*models.User, error) {
+	query := `
+		SELECT id, nickname, emoji_avatar, created_at
+		FROM users
+		WHERE id = $1
+	`
+
+	var user models.User
+
+	err := config.DB.QueryRow(query, userID).Scan(
+		&user.ID,
+		&user.Nickname,
+		&user.EmojiAvatar,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *UserRepository) GetAll() ([]models.User, error) {
 	query := `
 		SELECT id, nickname, emoji_avatar, created_at

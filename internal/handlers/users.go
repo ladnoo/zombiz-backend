@@ -3,10 +3,7 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"zombiz/internal/repositories"
 )
-
-var userRepo = repositories.NewUserRepository()
 
 func CreateUser(c *gin.Context) {
 	var input struct {
