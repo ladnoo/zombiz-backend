@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func GetCommentsByPost(c *gin.Context) {
@@ -31,14 +32,17 @@ func GetCommentsByPost(c *gin.Context) {
 	comments, err := commentRepo.GetByPostID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Ошибка при получении комментариев",
+			"error":   "Ошибка при получении комментариев",
+			"details": err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"count":   len(comments),
-		"comment": comments,
+		"post_id":   postID,
+		"post_text": post.Text,
+		"count":     len(comments),
+		"comment":   comments,
 	})
 }
 
@@ -93,7 +97,10 @@ func CreateComment(c *gin.Context) {
 
 	comment, err := commentRepo.Create(postID, input.UserID, input.Text, input.ImageURLs)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при создании комментария"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Ошибка при создании комментария",
+			"details": err.Error(),
+		})
 		return
 	}
 
@@ -118,5 +125,34 @@ func GetAllComments(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"total":    len(comments),
 		"comments": comments,
+	})
+}
+
+func GetCommentByID(c *gin.Context) {
+	commentIDstr := c.Param("comment_id")
+
+	commentID, err := strconv.Atoi(commentIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Неверный формат ID",
+		})
+		return
+	}
+
+	comment, err := commentRepo.GetByID(commentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Ошибка при получении комментария",
+		})
+		return
+	}
+
+	if comment == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Комментарий не неайден"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"comment": comment,
 	})
 }

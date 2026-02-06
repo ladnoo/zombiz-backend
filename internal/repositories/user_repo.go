@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"database/sql"
 	"zombiz/internal/config"
 	"zombiz/internal/models"
 )
@@ -72,6 +73,9 @@ func (r *UserRepository) GetByID(userID int) (*models.User, error) {
 		&user.CreatedAt,
 	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 

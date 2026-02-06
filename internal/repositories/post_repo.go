@@ -99,3 +99,43 @@ func (r *PostRepository) GetByID(postID int) (*models.Post, error) {
 	post.ImageURLs = imageURLsPQ
 	return &post, nil
 }
+
+func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
+	query := `
+		SELECT p.id, p.user_id, p.text, p.image_urls, p.created_at,
+		u.nickname, u.emoji_avatar
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE p.user_id = $1
+		ORDER BY p.created_at DESC;
+	`
+
+	rows, err := config.DB.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+
+	for rows.Next() {
+		var post models.Post
+		var imageURLsPQ pq.StringArray
+		err := rows.Scan(
+			&post.ID,
+			&post.UserID,
+			&post.Text,
+			&imageURLsPQ,
+			&post.CreatedAt,
+			&post.Nickname,
+			&post.EmojiAvatar,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+		post.ImageURLs = imageURLsPQ
+		posts = append(posts, post)
+	}
+	return posts, nil
+}

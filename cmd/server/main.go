@@ -34,15 +34,16 @@ func main() {
 	{
 		posts.GET("", handlers.GetPosts)    // Получить все посты
 		posts.POST("", handlers.CreatePost) // Создать посты
-
-		comments := posts.Group("/:id/comments")
-		{
-			comments.GET("", handlers.GetCommentsByPost)
-			comments.POST("", handlers.CreateComment)
-		}
+		posts.GET("/:id", handlers.GetPostByID)
+		posts.GET("/user/:user_id", handlers.GetPostByUserID)
 	}
 
-	r.GET("/comments", handlers.GetAllComments)
+	comments := r.Group("/comments")
+	{
+		comments.GET("/post/:post_id", handlers.GetCommentsByPost)
+		comments.POST("/post/:post_id", handlers.CreateComment)
+		comments.GET("/:id", handlers.GetCommentByID)
+	}
 
 	log.Println("Сревер запущен на порту 8080")
 	r.Run(":8080")
